@@ -1,0 +1,4 @@
+db.py
+token.txt
+__pycache__/
+.env
