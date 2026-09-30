@@ -1,20 +1,19 @@
-from dotenv import load_dotenv
-load_dotenv(os.path.join(BURK, ".env"))
-
-
 """Burk v2 — personal agent for Termux.
 New vs v1: Supabase storage, human-approval gate for risky actions,
 /goal long-horizon planning with background execution, web_search tool.
 Run:  python burk.py            (foreground, polls Telegram)
-Deps: pip install supabase openai    (openai optional; raw HTTP kept for zero-dep)
-Env:  OPENAI_API_KEY, SUPABASE_URL, SUPABASE_KEY, ~/burk/token.txt (Telegram bot token)
+Deps: pip install supabase openai python-dotenv   (openai optional; raw HTTP kept for zero-dep)
+Env:  OPENAI_API_KEY, SUPABASE_URL, SUPABASE_KEY in ~/burk/.env, ~/burk/token.txt (Telegram bot token)
 """
 import json, os, re, subprocess, time, urllib.parse, urllib.request
+from dotenv import load_dotenv
 import db
 from firewall import check_sms, check_request, is_risky
 
 HOME = os.path.expanduser("~")
 BURK = os.path.join(HOME, "burk")
+load_dotenv(os.path.join(BURK, ".env"))
+
 OPENAI_KEY = os.environ["OPENAI_API_KEY"]
 BOT_TOKEN = open(os.path.join(BURK, "token.txt")).read().strip()
 OFFSET = 0
@@ -59,7 +58,7 @@ def oai(messages, tools=None, max_tokens=1024):
 
 # ---------- phone tools (Termux:API) ----------
 def api(*args):
-    r = subprocess.run(["termux-api", *args], capture_output=True, text=True, timeout=30)
+    r = subprocess.run(list(args), capture_output=True, text=True, timeout=30)
     try:
         return json.loads(r.stdout)
     except Exception:
